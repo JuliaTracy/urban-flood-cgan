@@ -1,0 +1,10 @@
+# Local release payloads are deliberately not committed.
+release-assets/
+internal-tools/
+LOCAL_RELEASE_REPORT.md
+
+# Common local files
+.DS_Store
+Thumbs.db
+*.log
+__pycache__/

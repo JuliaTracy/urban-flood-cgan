@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use these model artifacts, please cite the associated article."
+title: "Model release for mechanism–data hybrid urban pluvial-flood prediction"
+type: software
+authors:
+  - family-names: Li
+    given-names: Ruyi
+  - family-names: Huang
+    given-names: Zhenyu
+  - family-names: Dong
+    given-names: Yang
+  - family-names: Hu
+    given-names: Qing
+  - family-names: Dong
+    given-names: Xin
+  - family-names: Zhong
+    given-names: Lijin
+preferred-citation:
+  type: article
+  title: "A mechanism-data hybrid pretraining-finetuning framework for rapid and reliable urban pluvial flooding prediction"
+  authors:
+    - family-names: Li
+      given-names: Ruyi
+    - family-names: Huang
+      given-names: Zhenyu
+    - family-names: Dong
+      given-names: Yang
+    - family-names: Hu
+      given-names: Qing
+    - family-names: Dong
+      given-names: Xin
+    - family-names: Zhong
+      given-names: Lijin
+  journal: Water Research
+  volume: "305"
+  year: 2026
+  doi: 10.1016/j.watres.2026.126491
+  url: "https://doi.org/10.1016/j.watres.2026.126491"
