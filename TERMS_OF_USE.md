@@ -6,7 +6,7 @@ Copyright © 2026 the authors. All rights reserved unless a separate written lic
 
 ## Model artifacts
 
-Model artifacts are supplied only after approval and subject to the terms provided with the download. Unless those written terms expressly permit otherwise, recipients must not redistribute the artifacts, provide public mirrors, use them commercially, reverse engineer them, or use them to re-identify study locations or individuals.
+Model artifacts are distributed in an encrypted compressed archive. The extraction password is provided after completion of the model-access questionnaire. Unless written terms supplied with the package expressly permit otherwise, recipients must not publicly disclose the password, redistribute the artifacts, provide public mirrors, use them commercially, reverse engineer them, or use them to re-identify study locations or individuals.
 
 ## Research integrity
 
@@ -18,4 +18,4 @@ Artifacts and documentation are provided “as is,” without warranties of accu
 
 ## Precedence
 
-If an approved download includes a signed agreement or a more specific license, that document controls in the event of a conflict.
+If the model package includes a signed agreement or a more specific license, that document controls in the event of a conflict.

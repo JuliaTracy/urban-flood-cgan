@@ -1,50 +1,62 @@
 # Model release: rapid urban pluvial-flood prediction
 
-This repository is the model-release companion to:
+This repository corresponds to the following paper:
 
-> Ruyi Li, Zhenyu Huang, Yang Dong, Qing Hu, Xin Dong, and Lijin Zhong (2026). “A mechanism-data hybrid pretraining-finetuning framework for rapid and reliable urban pluvial flooding prediction.” *Water Research*, 305, 126491. https://doi.org/10.1016/j.watres.2026.126491
+> Li, R., Huang, Z., Dong, Y., Hu, Q., Dong, X., \& Zhong, L. (2026). A mechanism-data hybrid pretraining-finetuning framework for rapid and reliable urban pluvial flooding prediction. \*Water Research\*, 305, 126491. https://doi.org/10.1016/j.watres.2026.126491
 
-## What is—and is not—released
+## About the study
 
-This repository intentionally contains documentation only. The associated release package contains trained model artifacts and checksums. Training code, inference source code, the water-depth extraction source code, raw observations, mechanistic simulations, social-media records, GIS layers, coordinates, API credentials, and study-area-specific configuration are not distributed here.
+This study addresses the trade-off between the high computational cost of high-fidelity hydrodynamic models for urban pluvial flooding and the strong dependence of purely data-driven models on large amounts of high-quality observations. It proposes a mechanism-data hybrid pretraining-finetuning framework for rapid inundation prediction. The framework first learns transferable hydrodynamic priors from randomized environmental scenarios, SWMM-CADDIES mechanistic simulations, and physical constraints based on mass and momentum conservation, and then adapts the pretrained model to local conditions using limited monitoring and multi-source observations. In this way, the model balances physical consistency of inundation dynamics, local predictive accuracy, and computational efficiency. The case study shows that the model can effectively reproduce the spatiotemporal evolution of urban flooding from onset and development to recession, achieve high accuracy at monitoring sites, and substantially reduce online simulation time, providing a practical approach for rapid urban-flood prediction, real-time warning, and emergency response under observation-scarce conditions.
 
-Two original PyTorch checkpoints are preserved by the authors:
+## Release scope
 
-- `pretrain_early_stop_20250903_0301.pth` — checkpoint after mechanism-informed pretraining;
-- `finetune_early_stop_20250902_1620_1.pth` — checkpoint after observation-guided finetuning.
+This Git repository provides the documentation and an encrypted model archive.
 
-Because a PyTorch `state_dict` depends on the private architecture implementation, source-free use should prefer the exported generator artifacts (`*.ts`, TorchScript) supplied in the approved download package. See [MODEL_USAGE.md](MODEL_USAGE.md) for the public runtime interface.
+The two original PyTorch checkpoints retained by the authors are:
 
-## Requesting model access
+* `pretrain\_wr.pth`: model checkpoint after mechanism-informed pretraining;
+* `finetune\_wr.pth`: model checkpoint after observation-guided finetuning.
 
-Model files are distributed through a registration-based access process so the authors can understand the communities and sectors using the research. GitHub itself cannot require a questionnaire before a public clone or ZIP download, so model binaries are not stored in the Git repository.
+The `.pth` files are `state\_dict` objects that depend on the private network architecture. Without access to the architecture source code, users should preferentially use the version-matched TorchScript generator model (`\*.ts`) provided upon approval. See [MODEL\_USAGE.md](MODEL_USAGE.md) for the public input-output interface.
 
-Please email a completed copy of [ACCESS_REQUEST_TEMPLATE.md](ACCESS_REQUEST_TEMPLATE.md) from an institutional or professional email address to one of the corresponding authors:
+## Method and environmental condition tensor
 
-- Prof. Xin Dong — `dongxin@tsinghua.edu.cn`
-- Prof. Lijin Zhong — `zhonglijin@huanding.org`
+According to the Supplementary Information, the environmental condition tensor consists of 11 channels: cumulative precipitation, mean precipitation intensity, maximum precipitation intensity, runoff coefficient, storage capacity, elevation (DEM), slope, topographic wetness index (TWI), stream power index (SPI), pipe capacity density, and road density.
 
-The request asks for your role/identity, sector, country or region, organization, intended use, and agreement to the access terms. Do not include government ID numbers, home addresses, or other sensitive personal data. Read [PRIVACY_NOTICE.md](PRIVACY_NOTICE.md) before sending a request.
+These 11 environmental variables jointly form the conditional input to the U-Net generator. The generator uses a 64-128-256-512-1024 encoding path, a symmetric decoding path, and skip connections, while a PatchGAN discriminator constrains the local spatial realism of the predicted next-step inundation-depth field.
 
-Access is not automatic. If approved, the corresponding author will provide the current download location and the terms that apply to the model package.
+During pretraining, randomized environmental scenarios and teacher signals generated by the coupled SWMM-CADDIES model are combined with physical constraints and knowledge distillation. During finetuning, sparse observations are used for local adaptation.
 
-## Requesting source code
+## Image-based water-level recognition
 
-The source code is not publicly distributed. Researchers who have a justified need for source access may describe that need in an email to the corresponding authors. Requests are considered case by case and may require additional terms or institutional approval.
+The study also includes a workflow for extracting urban-flood water-level observations from social-media images. YOLOv9 is first used to detect reference objects with relatively standardized dimensions, including vehicle wheels and human body parts, and to determine their key positions relative to the water surface. Water depth is then estimated using wheel specifications and the body-part-to-water-depth mapping described in the Supplementary Information.
+
+For images without a clear reference object, a compact two-layer CNN classifies water depth into four intervals: `(0, 10]`, `(10, 20]`, `(20, 30]`, and `(30, 40]` cm. Training includes image normalization and data augmentation, and evaluation metrics include top-1 classification accuracy and mean class-distance error. The extracted water-level estimates are associated only with locations supported by text, POIs, road signs, buildings, stations, or other visible geographic evidence; user IP addresses are not used to infer coordinates.
+
+The model archive includes `water\_level\_cnn.ckpt` for four-class image classification, `human\_reference\_detector.pt` for detecting human reference objects, and `wheel\_water\_level\_cnn.ckpt` for classifying wheel inundation into the labels `0`, `10`, `20`, `30`, `40`, and `50` cm.
+
+## Social-media text processing
+
+Posts from Weibo, Douyin, and Xiaohongshu are screened for urban pluvial-flood relevance. A language-model API extracts the reported event time, location expression and supporting text, quantitative water-depth expressions such as `30 cm`, qualitative descriptions such as `ankle-deep` or `knee-deep`, and the original evidence supporting each result. Quantitative values are converted to metres, while qualitative body-part descriptions are mapped using the correspondence table in the Supplementary Information.
+
+Location evidence is classified by specificity. Records containing POIs, intersections, stations, buildings, landmarks, streets, or neighbourhood-level descriptions can be retained for spatial analysis according to their quality level; records with insufficient evidence are excluded from point-based validation. The workflow does not infer missing water depths, locations, or coordinates. Text processing requires a compatible language-model API at runtime and does not use a separate local checkpoint.
+
+## Downloading the model archive
+
+The flood-prediction and water-level-recognition model files, package manifest, and checksums are uploaded as an encrypted compressed archive. Please complete the [model-access questionnaire](https://v.wjx.cn/vm/wMNCnEA.aspx#) to obtain the extraction password.
+
+The questionnaire collects the respondent's city, organization or institution, professional identity or role, and industry or field in order to understand the user community of this research output. Please do not provide government identification numbers, home addresses, financial information, passwords, or other sensitive personal information. Before submitting the questionnaire, please read [PRIVACY\_NOTICE.md](PRIVACY_NOTICE.md).
+
+The extraction password is provided solely for access to the supplied research model package. Please do not publish the password or redistribute it together with the archive. After extraction, use `SHA256SUMS.txt` to verify all model files.
+
+For further questions, please contact: [liry18@tsinghua.org.cn](mailto:liry18@tsinghua.org.cn)
 
 ## Documentation
 
-- [MODEL_CARD.md](MODEL_CARD.md): scope, limitations, and responsible use;
-- [MODEL_USAGE.md](MODEL_USAGE.md): artifact verification and TorchScript interface;
-- [ACCESS_REQUEST_TEMPLATE.md](ACCESS_REQUEST_TEMPLATE.md): registration email template;
-- [PRIVACY_NOTICE.md](PRIVACY_NOTICE.md): purpose and handling of registration information;
-- [TERMS_OF_USE.md](TERMS_OF_USE.md): repository and model-access terms;
-- [CITATION.cff](CITATION.cff): machine-readable citation metadata.
+* [MODEL\_CARD.md](MODEL_CARD.md): model scope and limitations;
+* [MODEL\_USAGE.md](MODEL_USAGE.md): urban-flood prediction model interface;
+* [WATER\_LEVEL\_USAGE.md](WATER_LEVEL_USAGE.md): image water-level recognition and social-media text processing;
+* [ARCHIVE\_ACCESS.md](ARCHIVE_ACCESS.md): questionnaire and extraction-password instructions;
+* [PRIVACY\_NOTICE.md](PRIVACY_NOTICE.md): handling of questionnaire information;
+* [TERMS\_OF\_USE.md](TERMS_OF_USE.md): package access and use terms.
 
-## Citation
-
-If this model or its documentation contributes to your work, cite the paper above. A BibTeX entry is provided in [CITATION.bib](CITATION.bib).
-
-## Disclaimer
-
-The artifacts are research outputs, not an operational warning system. They must not be used as the sole basis for emergency response, public-safety, engineering-design, insurance, or regulatory decisions.
